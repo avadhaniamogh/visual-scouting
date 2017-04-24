@@ -4,57 +4,14 @@ import json
 conn = sqlite3.connect('database.sqlite')
 cursor = conn.cursor()
 
-# Returned dictionary is of the form <TeamId, [Position, Points, Wins, Draws, Losses, GF, GA, GD, CS, TeamId, Long name, short name]>
-def getStandings(league_id, season):
-    get_standings_query = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id From Match Where season = ? And league_id = ?;";
-    all_standings = {}
-
-    cursor.execute(get_standings_query, (season, league_id,))
-    for row in cursor:
-        homeTeamGoal = row[0]
-        awayTeamGoal = row[1]
-        homeTeamId = row[2]
-        awayTeamId = row[3]
-
-        print homeTeamGoal
-
-        if homeTeamId not in all_standings:
-            all_standings[homeTeamId] = [0] * 12
-        if awayTeamId not in all_standings:
-            all_standings[awayTeamId] = [0] * 12
-
-        home_team_result_list = all_standings[homeTeamId]
-        away_team_result_list = all_standings[awayTeamId]
-
-        home_team_result_list[9] = homeTeamId
-        away_team_result_list[9] = awayTeamId
-
-        if homeTeamGoal > awayTeamGoal:
-            home_team_result_list[2] += 1  # win for home team
-            home_team_result_list[1] += 3  # 3 points for home team
-            away_team_result_list[4] += 1  # loss for away team
-        elif awayTeamGoal == homeTeamGoal:
-            home_team_result_list[3] += 1  # draw for home team
-            home_team_result_list[1] += 1  # 1 point for home team
-
-            away_team_result_list[3] += 1  # draw for away team
-            away_team_result_list[1] += 1  # 1 point for away team
-        else:
-            home_team_result_list[4] += 1  # loss for home team
-            away_team_result_list[2] += 1  # win for away team
-            away_team_result_list[1] += 3  # 3 points for away win
-
-        all_standings[homeTeamId] = home_team_result_list
-        all_standings[awayTeamId] = away_team_result_list
-
-    print all_standings
-
 def getAllCountries():
     query = "Select * from Country"
     cursor.execute(query)
+    countries_to_be_shown = [1729, 4769, 7809, 10257, 21518]
     countries = []
     for row in cursor:
-        countries.append(row)
+        if(row[0] in countries_to_be_shown):
+            countries.append(row)
     return countries
 
 
@@ -77,7 +34,7 @@ def getTeamsForSeason(league_id, season):
         team_ids.add(row[1])
     team_ids = list(team_ids)
     teams = []
-    teams_query = "Select * from Team where team_api_id = ?"
+    teams_query = "Select team_api_id, team_long_name, team_short_name from Team where team_api_id = ?"
     for team_id in team_ids:
         cursor.execute(teams_query, (team_id,))
         for row in cursor:
@@ -272,12 +229,14 @@ def getStandingsOfTeamForSeason(league_id, season):
     # return all_standings
 
 
-# teams = getTeamsForSeason("1729", "2014/2015")
+teams = getTeamsForSeason("1729", "2014/2015")
 # print teams
 
-all_standings = getStandingsOfTeamForSeason("1729", "2014/2015")
+# all_standings = getStandingsOfTeamForSeason("1729", "2014/2015")
 # print sorted(all_standings.items(), key=lambda k: (k[1][1], k[1][7]), reverse=True)
 
 # getTeamLongAndShortNames("9825")
 
 # getStandings("1729", "2014/2015")
+
+# getAllCountries()
