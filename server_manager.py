@@ -9,16 +9,27 @@ app = Flask(__name__)
 
 latest_season = "2015/2016"
 
+'''
+================================================
+NOTE: In all the places country_id = league_id
+================================================
+'''
 
-@app.route("/data/epl/teams/standings")
-def getSeasonStandings():
-    season_details = database_manager.getStandingsOfTeamForSeason("1729", "2014/2015")
-    standings_dict = {}
-    for detail in season_details:
-        standings_dict[detail] = season_details[detail][0]
-    standings_json = json.dumps(standings_dict)
-    print standings_json
-    return standings_json
+
+# - (1)
+@app.route("/data/stats/")
+def getEndSeasonStatistics():
+    country_id = request.args.get('country_id')
+    season_details = database_manager.getEndSeasonStatisticsOfTeamsForSeason(country_id, latest_season)
+    return season_details
+
+
+# - (2)
+@app.route("/data/standings/")
+def getWeekByWeekStandings():
+    country_id = request.args.get('country_id')
+    week_by_week_details = database_manager.getSeasonwideStandingsDetails(country_id, latest_season)
+    return week_by_week_details
 
 
 @app.route("/data/countries/")
