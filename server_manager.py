@@ -37,18 +37,23 @@ def getMenu():
     countries_shown = database_manager.getAllCountries()
     list_dict_countries = []
     for country_detail in countries_shown:
+        dict_country = {}
+        dict_country['country_id'] = country_detail[0]
+        dict_country['country_name'] = country_detail[1]
         country_id = country_detail[0]
-        print country_id
         teams = database_manager.getTeamsForSeason(country_id, latest_season)
+        list_dict_teams = []
         for team in teams:
             dict_team = {}
             dict_team['team_id'] = team[0]
             dict_team['long_name'] = team[1]
             dict_team['short_name'] = team[2]
-            dict_team['country_id'] = country_detail[0]
-            dict_team['country_name'] = country_detail[1]
-            list_dict_countries.append(dict_team)
+            list_dict_teams.append(dict_team)
+
+        dict_country['teams'] = list_dict_teams
+        list_dict_countries.append(dict_country)
     json_countries = json.dumps(list_dict_countries)
+    print json_countries
     return json_countries
 
     # list_dict_countries = []
