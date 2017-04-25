@@ -32,18 +32,34 @@ def getWeekByWeekStandings():
     return week_by_week_details
 
 
-@app.route("/data/countries/")
-def getAllCountries():
+@app.route("/data/menu/")
+def getMenu():
     countries_shown = database_manager.getAllCountries()
     list_dict_countries = []
     for country_detail in countries_shown:
-        dict_country = {}
-        dict_country['country_id'] = country_detail[0]
-        dict_country['country_name'] = country_detail[1]
-        list_dict_countries.append(dict_country)
+        country_id = country_detail[0]
+        print country_id
+        teams = database_manager.getTeamsForSeason(country_id, latest_season)
+        for team in teams:
+            dict_team = {}
+            dict_team['team_id'] = team[0]
+            dict_team['long_name'] = team[1]
+            dict_team['short_name'] = team[2]
+            dict_team['country_id'] = country_detail[0]
+            dict_team['country_name'] = country_detail[1]
+            list_dict_countries.append(dict_team)
     json_countries = json.dumps(list_dict_countries)
-    # print json_countries
     return json_countries
+
+    # list_dict_countries = []
+    # for country_detail in countries_shown:
+    #     dict_country = {}
+    #     dict_country['country_id'] = country_detail[0]
+    #     dict_country['country_name'] = country_detail[1]
+    #     list_dict_countries.append(dict_country)
+    # json_countries = json.dumps(list_dict_countries)
+    # # print json_countries
+    # return json_countries
 
 
 @app.route("/data/countries/teams")
