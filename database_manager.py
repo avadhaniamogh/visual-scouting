@@ -1,5 +1,6 @@
 import sqlite3
 import json
+import collections
 
 conn = sqlite3.connect('database.sqlite')
 cursor = conn.cursor()
@@ -295,7 +296,9 @@ def getStandingsDetailsForGameweek(league_id, season, gameweek):
         result[homeTeamId] = home_team_result_list
         result[awayTeamId] = away_team_result_list
 
-    return result
+    od = collections.OrderedDict(sorted(result.items()))
+
+    return dict(od)
 
 
 # teams = getTeamsForSeason("1729", "2014/2015")
@@ -304,7 +307,10 @@ def getStandingsDetailsForGameweek(league_id, season, gameweek):
 def getSeasonwideStandingsDetails(league_id, season):
     overall = []
 
+    count = 0
     for i in range(1, 39):
+        # if count > 0:
+        #     break
         gameweek_result = []
 
         result = getStandingsDetailsForGameweek(league_id, season, i)
@@ -339,8 +345,13 @@ def getSeasonwideStandingsDetails(league_id, season):
 
         overall.append(gameweek_result)
 
+        count = count + 1
+
     json_data = json.dumps(overall)
     print json_data
+    return json_data
+
+getSeasonwideStandingsDetails("1729", "2015/2016")
 
     # print gameweek_result
 
