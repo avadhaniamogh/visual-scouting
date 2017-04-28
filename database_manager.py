@@ -1,6 +1,7 @@
 import sqlite3
 import json
 import collections
+import unicodedata
 
 conn = sqlite3.connect('database.sqlite')
 cursor = conn.cursor()
@@ -55,8 +56,9 @@ def getTeamLongAndShortNames(team_id):
     cursor.execute(get_team_name_query, (team_id,))
     team_names = []
     for row in cursor:
-        team_names.append(row[0])
-        team_names.append(row[1])
+        team_names.append(unicodedata.normalize('NFKD', row[0]).encode('ascii', 'ignore'))
+        team_names.append(unicodedata.normalize('NFKD', row[1]).encode('ascii', 'ignore'))
+
     return team_names
 
 
@@ -351,7 +353,9 @@ def getSeasonwideStandingsDetails(league_id, season):
     print json_data
     return json_data
 
-getSeasonwideStandingsDetails("1729", "2015/2016")
+# getSeasonwideStandingsDetails("1729", "2015/2016")
+# names = getTeamLongAndShortNames("9985")
+# print names
 
     # print gameweek_result
 
