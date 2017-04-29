@@ -238,6 +238,54 @@ def getEndSeasonStatisticsOfTeamsForSeason(league_id, season):
     return json_data
 
 
+# <TeamId, [Position, Points, Wins, Draws, Losses, GF, GA, GD, CS, TeamId, Long name, short name]>
+def getHistoryStatsForTeam(league_id, season, team_id):
+    get_history_stats_for_team_query = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id " \
+                                       "From Match Where season = ? And league_id = ? And (home_team_api_id = ? or away_team_api_id = ?);"
+    cursor.execute(get_history_stats_for_team_query, (season, league_id, team_id, team_id))
+
+    result_list = [0] * 12
+    for row in cursor:
+        homeTeamGoal = row[0]
+        awayTeamGoal = row[1]
+        homeTeamId = row[2]
+        awayTeamId = row[3]
+
+        team_id = team_id.strip()
+
+        if team_id == str(homeTeamId):
+            if int(homeTeamGoal) > int(awayTeamGoal):
+                result_list[2] += 1  # win for home team
+                result_list[1] += 3  # 3 points for home team
+            elif int(awayTeamGoal) == int(homeTeamGoal):
+                result_list[3] += 1  # draw for home team
+                result_list[1] += 1  # 1 point for home team
+
+            else:
+                result_list[4] += 1  # loss for home team
+
+            result_list[5] += int(homeTeamGoal)  # GF
+            result_list[6] += int(awayTeamGoal)  # GA
+            result_list[7] += (int(homeTeamGoal) - int(awayTeamGoal))
+
+        elif team_id == str(awayTeamId):
+            if int(homeTeamGoal) > int(awayTeamGoal):
+                result_list[4] += 1  # loss for away team
+            elif int(awayTeamGoal) == int(homeTeamGoal):
+
+                result_list[3] += 1  # draw for away team
+                result_list[1] += 1  # 1 point for away team
+            else:
+                result_list[2] += 1  # win for away team
+                result_list[1] += 3  # 3 points for away win
+
+            result_list[5] += int(awayTeamGoal)  # GF
+            result_list[6] += int(homeTeamGoal)  # GA
+            result_list[7] += int(awayTeamGoal) - int(homeTeamGoal)
+
+    print result_list
+
+
 def getStandingsDetailsForGameweek(league_id, season, gameweek):
     gameweek_details_query = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id, match_api_id From Match Where season = ? And league_id = ? And stage = ?;"
     cursor.execute(gameweek_details_query, (season, league_id, gameweek,))
@@ -353,37 +401,81 @@ def getSeasonwideStandingsDetails(league_id, season):
     print json_data
     return json_data
 
+
+def getPlayersForTeamInSeason(season):
+    getHomeAndAwayTeamIdsQuery = "Select home_team_api_id, away_team_api_id, home_player_1, home_player_2, " \
+                                 "home_player_3, home_player_4, home_player_5, home_player_6, home_player_7, " \
+                                 "home_player_8, home_player_9, home_player_10, home_player_11, away_player_1, " \
+                                 "away_player_2, away_player_3, away_player_4, away_player_5, away_player_6, " \
+                                 "away_player_7, away_player_8, away_player_9, away_player_10, away_player_11 " \
+                                 "From Match Where season = ?";
+
+    cursor.execute(getHomeAndAwayTeamIdsQuery, (season,))
+    result = {}
+    for row in cursor:
+        home_team_id = row[0]
+        away_team_id = row[1]
+
+        if home_team_id not in result:
+            result[home_team_id] = []
+        if away_team_id not in result:
+            result[away_team_id] = []
+
+        home_team_list = result[home_team_id]
+        away_team_list = result[away_team_id]
+
+        for i in range(2, 13):
+            player_id = row[i]
+            if (player_id not in home_team_list):
+                home_team_list.append(player_id)
+
+        for i in range(13, 24):
+            player_id = row[i]
+            if (player_id not in away_team_list):
+                away_team_list.append(player_id)
+
+        result[home_team_id] = home_team_list
+        result[away_team_id] = away_team_list
+
+    return result
+
+
+getHistoryStatsForTeam("1729", "2008/2009", "8668")
+
+# result = getPlayersForTeamInSeason("2015/2016")
+# print result
+
 # getSeasonwideStandingsDetails("1729", "2015/2016")
 # names = getTeamLongAndShortNames("9985")
 # print names
 
-    # print gameweek_result
+# print gameweek_result
 
-    # result = getStandingsDetailsForGameweek("1729", "2014/2015", 2)
-    #
-    # sorted_result = sorted(result.items(), key=lambda k: (k[1][1], k[1][7]), reverse=True)
-    # all_position = []
-    # for club in sorted_result:
-    #     all_position.append(club[0])
-    #
-    # for key, value in result.iteritems():
-    #     # Add position to each club
-    #     pos = all_position.index(key)
-    #     value[0] = pos + 1
-    #
-    #     team_id = value[4]
-    #     oppn_id = value[5]
-    #     team_names = getTeamLongAndShortNames(team_id)
-    #     oppn_names = getTeamLongAndShortNames(oppn_id)
-    #
-    #     value[7] = str(team_names[0])
-    #     value[8] = str(team_names[1])
-    #     value[9] = str(oppn_names[0])
-    #     value[10] = str(oppn_names[1])
-    #
-    # attributes_names_list = ['pos', 'points', 'GD', 'match_id', 'team_id', 'oppn_id', 'score', 'team_short_name',
-    #                          'team_long_name', 'oppn_short_name', 'oppn_long_name']
-    # for key, value in result.iteritems():
-    #     dict_list = zip(attributes_names_list, value)
-    #     dict_list = dict(dict_list)
-    #     gameweek_result.append(dict_list)
+# result = getStandingsDetailsForGameweek("1729", "2014/2015", 2)
+#
+# sorted_result = sorted(result.items(), key=lambda k: (k[1][1], k[1][7]), reverse=True)
+# all_position = []
+# for club in sorted_result:
+#     all_position.append(club[0])
+#
+# for key, value in result.iteritems():
+#     # Add position to each club
+#     pos = all_position.index(key)
+#     value[0] = pos + 1
+#
+#     team_id = value[4]
+#     oppn_id = value[5]
+#     team_names = getTeamLongAndShortNames(team_id)
+#     oppn_names = getTeamLongAndShortNames(oppn_id)
+#
+#     value[7] = str(team_names[0])
+#     value[8] = str(team_names[1])
+#     value[9] = str(oppn_names[0])
+#     value[10] = str(oppn_names[1])
+#
+# attributes_names_list = ['pos', 'points', 'GD', 'match_id', 'team_id', 'oppn_id', 'score', 'team_short_name',
+#                          'team_long_name', 'oppn_short_name', 'oppn_long_name']
+# for key, value in result.iteritems():
+#     dict_list = zip(attributes_names_list, value)
+#     dict_list = dict(dict_list)
+#     gameweek_result.append(dict_list)
