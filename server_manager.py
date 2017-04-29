@@ -84,6 +84,32 @@ def getTeamsFromCountry():
     return json_teams
 
 
+@app.route("/data/teams/history")
+def getHistoryStandingsForTeam():
+    team_id = request.args.get('team_id')
+    league_id = request.args.get('country_id')
+    season = latest_season
+    team_stats = database_manager.getEndSeasonStatisticsOfTeamForSeason(league_id, season, team_id)
+    data = {}
+    data[season] = team_stats
+
+    for i in range(0, 7):
+        halves = season.split("/")
+        first_half = halves[0]
+        second_half = halves[1]
+        first_half = int(first_half) - 1
+        second_half = int(second_half) - 1
+        season = str(first_half) + "/" + str(second_half)
+        database_manager.getEndSeasonStatisticsOfTeamForSeason(league_id, season, team_id)
+        data[season] = team_stats
+
+
+    json_data = json.dumps(data)
+
+    print json_data
+    return json_data
+
+
 @app.route("/")
 def index():
     return render_template("index.html")

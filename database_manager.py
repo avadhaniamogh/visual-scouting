@@ -439,8 +439,102 @@ def getPlayersForTeamInSeason(season):
 
     return result
 
+# Returned dictionary is of the form <TeamId, [Position, Points, Wins, Draws, Losses, GF, GA, GD, CS, TeamId, Long name, short name]>
+def getEndSeasonStatisticsOfTeamForSeason(league_id, season, team_id):
+    get_standings_query = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id From Match Where season = ? And league_id = ?;";
+    all_standings = {}
 
-getHistoryStatsForTeam("1729", "2008/2009", "8668")
+    overall = []
+
+    cursor.execute(get_standings_query, (season, league_id,))
+    for row in cursor:
+        homeTeamGoal = row[0]
+        awayTeamGoal = row[1]
+        homeTeamId = row[2]
+        awayTeamId = row[3]
+
+        if homeTeamId not in all_standings:
+            all_standings[homeTeamId] = [0] * 12
+        if awayTeamId not in all_standings:
+            all_standings[awayTeamId] = [0] * 12
+
+        home_team_result_list = all_standings[homeTeamId]
+        away_team_result_list = all_standings[awayTeamId]
+
+        home_team_result_list[9] = homeTeamId
+        away_team_result_list[9] = awayTeamId
+
+        if int(homeTeamGoal) > int(awayTeamGoal):
+            home_team_result_list[2] += 1  # win for home team
+            home_team_result_list[1] += 3  # 3 points for home team
+            away_team_result_list[4] += 1  # loss for away team
+        elif int(awayTeamGoal) == int(homeTeamGoal):
+            home_team_result_list[3] += 1  # draw for home team
+            home_team_result_list[1] += 1  # 1 point for home team
+
+            away_team_result_list[3] += 1  # draw for away team
+            away_team_result_list[1] += 1  # 1 point for away team
+        else:
+            home_team_result_list[4] += 1  # loss for home team
+
+            away_team_result_list[2] += 1  # win for away team
+            away_team_result_list[1] += 3  # 3 points for away win
+
+        home_team_result_list[5] += int(homeTeamGoal)  # GF
+        home_team_result_list[6] += int(awayTeamGoal)  # GA
+        home_team_result_list[7] += (int(homeTeamGoal) - int(awayTeamGoal))
+
+        if int(homeTeamGoal) == 0:
+            home_team_result_list[8] += 1
+
+        if int(awayTeamGoal) == 0:
+            away_team_result_list[8] += 1
+
+        away_team_result_list[5] += int(awayTeamGoal)  # GF
+        away_team_result_list[6] += int(homeTeamGoal)  # GA
+        away_team_result_list[7] += int(awayTeamGoal) - int(homeTeamGoal)
+
+        all_standings[homeTeamId] = home_team_result_list
+        all_standings[awayTeamId] = away_team_result_list
+
+    sorted_all_standings = sorted(all_standings.items(), key=lambda k: (k[1][1], k[1][7]), reverse=True)
+    all_position = []
+    for club in sorted_all_standings:
+        all_position.append(club[0])
+
+    for key, value in all_standings.iteritems():
+        # Add position to each club
+        pos = all_position.index(key)
+        value[0] = pos + 1
+
+        # Team names
+        team_names = getTeamLongAndShortNames(key)
+        value[10] = str(team_names[0])
+        value[11] = str(team_names[1])
+
+    team_stats = all_standings[int(team_id)]
+
+    attributes_names_list = ['Pos', 'Pts', 'W', 'D', 'L', 'GF', 'GA', 'GD', 'CS', 'team_id', 'long_name', 'short_name']
+    dict_list = zip(attributes_names_list, team_stats)
+    dict_list = dict(dict_list)
+    # overall.append(dict_list)
+    return dict_list
+
+
+# season = "2015/2016"
+# getEndSeasonStatisticsOfTeamForSeason("1729", season, "8668")
+#
+# for i in range(0, 7):
+#     halves = season.split("/")
+#     first_half = halves[0]
+#     second_half = halves[1]
+#     first_half = int(first_half) - 1
+#     second_half = int(second_half) - 1
+#     season = str(first_half) + "/" + str(second_half)
+#     getEndSeasonStatisticsOfTeamForSeason("1729", season, "8668")
+
+
+# getHistoryStatsForTeam("1729", "2008/2009", "8668")
 
 # result = getPlayersForTeamInSeason("2015/2016")
 # print result
