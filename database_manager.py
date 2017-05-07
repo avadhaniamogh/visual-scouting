@@ -439,6 +439,7 @@ def getPlayersForTeamInSeason(season):
 
     return result
 
+
 # Returned dictionary is of the form <TeamId, [Position, Points, Wins, Draws, Losses, GF, GA, GD, CS, TeamId, Long name, short name]>
 def getEndSeasonStatisticsOfTeamForSeason(league_id, season, team_id):
     get_standings_query = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id From Match Where season = ? And league_id = ?;";
@@ -521,6 +522,64 @@ def getEndSeasonStatisticsOfTeamForSeason(league_id, season, team_id):
     return dict_list
 
 
+# TODO: Player info
+def getPlayerAttributes(player_id):
+    get_player_attributes_query = "Select min(date), overall_rating, potential, attacking_work_rate, defensive_work_rate, crossing, finishing, heading_accuracy, short_passing, volleys, dribbling, curve, free_kick_accuracy, long_passing, ball_control, acceleration, sprint_speed, agility, reactions, balance, shot_power, jumping, stamina, strength, long_shots, aggression, interceptions, positioning, vision, penalties, marking, standing_tackle, sliding_tackle, gk_diving, gk_handling, gk_kicking, gk_positioning, gk_reflexes From Player_Attributes Where player_api_id = ?;";
+    cursor.execute(get_player_attributes_query, (player_id,))
+    overall_rating = potential = attacking_work_rate = defensive_work_rate = crossing = finishing = heading_accuracy = short_passing = volleys = dribbling = curve = free_kick_accuracy = long_passing = ball_control = acceleration = sprint_speed = agility = reactions = balance = shot_power = jumping = stamina = strength = long_shots = aggression = interceptions = positioning = vision = penalties = marking = standing_tackle = sliding_tackle = gk_diving = gk_handling = gk_kicking = gk_positioning = gk_reflexes = 0
+    attacking = defensive = physical = mental = technical = goalkeeping = overall_rating = 0
+    for row in cursor:
+        overall_rating = row[1]
+        potential = row[2]
+        attacking_work_rate = row[3]
+        defensive_work_rate = row[4]
+        crossing = row[5]
+        finishing = row[6]
+        heading_accuracy = row[7]
+        short_passing = row[8]
+        volleys = row[9]
+        dribbling = row[10]
+        curve = row[11]
+        free_kick_accuracy = row[12]
+        long_passing = row[13]
+        ball_control = row[14]
+        acceleration = row[15]
+        sprint_speed = row[16]
+        agility = row[17]
+        reactions = row[18]
+        balance = row[19]
+        shot_power = row[20]
+        jumping = row[21]
+        stamina = row[22]
+        strength = row[23]
+        long_shots = row[24]
+        aggression = row[25]
+        interceptions = row[26]
+        positioning = row[27]
+        vision = row[28]
+        penalties = row[28]
+        marking = row[29]
+        standing_tackle = row[30]
+        sliding_tackle = row[31]
+        gk_diving = row[32]
+        gk_handling = row[33]
+        gk_kicking = row[34]
+        gk_positioning = row[35]
+        gk_reflexes = row[36]
+
+    attacking = ( crossing + finishing + shot_power) / 3
+    defensive = (standing_tackle + sliding_tackle + marking + interceptions) / 3
+    physical = (acceleration + sprint_speed + agility + balance + jumping + stamina + strength) / 7
+    mental = (reactions + aggression + positioning + interceptions + vision) / 5
+    technical = (
+                    potential + heading_accuracy + short_passing + volleys + dribbling + curve + free_kick_accuracy + long_passing + ball_control + long_shots + penalties) / 11
+    goalkeeping = (gk_diving + gk_handling + gk_kicking + gk_positioning + gk_reflexes) / 5
+
+    print str(attacking) + "," + str(defensive) + "," + str(physical) + "," + str(mental) + "," + str(technical) + "," + str(goalkeeping)
+
+
+getPlayerAttributes("30829")
+
 # season = "2015/2016"
 # getEndSeasonStatisticsOfTeamForSeason("1729", season, "8668")
 #
@@ -535,9 +594,6 @@ def getEndSeasonStatisticsOfTeamForSeason(league_id, season, team_id):
 
 
 # getHistoryStatsForTeam("1729", "2008/2009", "8668")
-
-# result = getPlayersForTeamInSeason("2015/2016")
-# print result
 
 # getSeasonwideStandingsDetails("1729", "2015/2016")
 # names = getTeamLongAndShortNames("9985")
