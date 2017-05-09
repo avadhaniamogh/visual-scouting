@@ -2,6 +2,9 @@ import sqlite3
 import json
 import collections
 import unicodedata
+from sklearn.decomposition import PCA
+import pandas as pd
+import numpy as np
 
 conn = sqlite3.connect('database.sqlite')
 cursor = conn.cursor()
@@ -523,12 +526,30 @@ def getEndSeasonStatisticsOfTeamForSeason(league_id, season, team_id):
 
 
 # TODO: Player info
-def getPlayerAttributes(player_id):
-    get_player_attributes_query = "Select min(date), overall_rating, potential, attacking_work_rate, defensive_work_rate, crossing, finishing, heading_accuracy, short_passing, volleys, dribbling, curve, free_kick_accuracy, long_passing, ball_control, acceleration, sprint_speed, agility, reactions, balance, shot_power, jumping, stamina, strength, long_shots, aggression, interceptions, positioning, vision, penalties, marking, standing_tackle, sliding_tackle, gk_diving, gk_handling, gk_kicking, gk_positioning, gk_reflexes From Player_Attributes Where player_api_id = ?;";
-    cursor.execute(get_player_attributes_query, (player_id,))
+def getPlayerName(player_id):
+    player_name_query = "Select player_name From Player Where player_api_id = ?;"
+    cursor.execute(player_name_query, (player_id,))
+    name = ""
+    for row in cursor:
+        name = unicodedata.normalize('NFKD', row[0]).encode('ascii', 'ignore')
+
+    return name
+
+def getPlayerAttributes():
+    get_player_attributes_query = "Select date, overall_rating, potential, attacking_work_rate, defensive_work_rate, crossing, finishing, heading_accuracy, short_passing, volleys, dribbling, curve, free_kick_accuracy, long_passing, ball_control, acceleration, sprint_speed, agility, reactions, balance, shot_power, jumping, stamina, strength, long_shots, aggression, interceptions, positioning, vision, penalties, marking, standing_tackle, sliding_tackle, gk_diving, gk_handling, gk_kicking, gk_positioning, gk_reflexes, player_api_id From Player_Attributes;";
+    cursor.execute(get_player_attributes_query)
     overall_rating = potential = attacking_work_rate = defensive_work_rate = crossing = finishing = heading_accuracy = short_passing = volleys = dribbling = curve = free_kick_accuracy = long_passing = ball_control = acceleration = sprint_speed = agility = reactions = balance = shot_power = jumping = stamina = strength = long_shots = aggression = interceptions = positioning = vision = penalties = marking = standing_tackle = sliding_tackle = gk_diving = gk_handling = gk_kicking = gk_positioning = gk_reflexes = 0
     attacking = defensive = physical = mental = technical = goalkeeping = overall_rating = 0
+    attr_list = []
+    complete_attr_list = []
+    attr_dict = {}
+    count = 0
     for row in cursor:
+
+        # count = count + 1
+        # if count > 100:
+        #     break
+
         overall_rating = row[1]
         potential = row[2]
         attacking_work_rate = row[3]
@@ -557,28 +578,148 @@ def getPlayerAttributes(player_id):
         interceptions = row[26]
         positioning = row[27]
         vision = row[28]
-        penalties = row[28]
-        marking = row[29]
-        standing_tackle = row[30]
-        sliding_tackle = row[31]
-        gk_diving = row[32]
-        gk_handling = row[33]
-        gk_kicking = row[34]
-        gk_positioning = row[35]
-        gk_reflexes = row[36]
+        penalties = row[29]
+        marking = row[30]
+        standing_tackle = row[31]
+        sliding_tackle = row[32]
+        gk_diving = row[33]
+        gk_handling = row[34]
+        gk_kicking = row[35]
+        gk_positioning = row[36]
+        gk_reflexes = row[37]
+        player_id = row[38]
 
-    attacking = ( crossing + finishing + shot_power) / 3
-    defensive = (standing_tackle + sliding_tackle + marking + interceptions) / 3
-    physical = (acceleration + sprint_speed + agility + balance + jumping + stamina + strength) / 7
-    mental = (reactions + aggression + positioning + interceptions + vision) / 5
-    technical = (
-                    potential + heading_accuracy + short_passing + volleys + dribbling + curve + free_kick_accuracy + long_passing + ball_control + long_shots + penalties) / 11
-    goalkeeping = (gk_diving + gk_handling + gk_kicking + gk_positioning + gk_reflexes) / 5
+        if attacking_work_rate == "low":
+            attacking_work_rate = 33
+        elif attacking_work_rate == "medium":
+            attacking_work_rate = 66
+        elif attacking_work_rate == "high":
+            attacking_work_rate = 99
+        else:
+            attacking_work_rate = 33
 
-    print str(attacking) + "," + str(defensive) + "," + str(physical) + "," + str(mental) + "," + str(technical) + "," + str(goalkeeping)
+        if defensive_work_rate == "low":
+            defensive_work_rate = 33
+        elif defensive_work_rate == "medium":
+            defensive_work_rate = 66
+        elif defensive_work_rate == "high":
+            defensive_work_rate = 99
+        else:
+            defensive_work_rate = 33
 
+        if sliding_tackle == None:
+            sliding_tackle = 40
+        if acceleration == None:
+            acceleration = 40
+        if agility == None:
+            agility = 40
+        if sprint_speed == None:
+            sprint_speed = 40
+        if balance == None:
+            balance = 40
+        if jumping == None:
+            jumping = 40
+        if stamina == None:
+            stamina = 40
+        if strength == None:
+            strength = 40
+        if reactions == None:
+            reactions = 40
+        if aggression == None:
+            aggression = 40
+        if positioning == None:
+            positioning = 40
+        if interceptions == None:
+            interceptions = 40
+        if vision == None:
+            vision = 40
+        if potential == None:
+            potential = 40
+        if heading_accuracy == None:
+            heading_accuracy = 40
+        if short_passing == None:
+            short_passing = 40
+        if volleys == None:
+            volleys = 40
+        if dribbling == None:
+            dribbling = 40
+        if curve == None:
+            curve = 40
+        if free_kick_accuracy == None:
+            free_kick_accuracy = 40
+        if long_passing == None:
+            long_passing = 40
+        if ball_control == None:
+            ball_control = 40
+        if long_shots == None:
+            long_shots = 40
+        if penalties == None:
+            penalties = 40
+        if attacking_work_rate == None:
+            attacking_work_rate = 40
+        if crossing == None:
+            crossing = 40
+        if finishing == None:
+            finishing = 40
+        if shot_power == None:
+            shot_power = 40
+        if defensive_work_rate == None:
+            defensive_work_rate = 40
+        if standing_tackle == None:
+            standing_tackle = 40
+        if marking == None:
+            marking = 40
+        if interceptions == None:
+            interceptions = 40
+        if gk_diving == None:
+            gk_diving = 4
+        if gk_handling == None:
+            gk_handling = 4
+        if gk_kicking == None:
+            gk_kicking = 4
+        if gk_positioning == None:
+            gk_positioning = 4
+        if gk_reflexes == None:
+            gk_reflexes = 4
+        if overall_rating == None:
+            overall_rating = 50
 
-getPlayerAttributes("30829")
+        attacking = (attacking_work_rate + crossing + finishing + shot_power) / 4
+        defensive = (defensive_work_rate + standing_tackle + sliding_tackle + marking + interceptions) / 5
+        physical = (acceleration + sprint_speed + agility + balance + jumping + stamina + strength) / 7
+        mental = (reactions + aggression + positioning + interceptions + vision) / 5
+        technical = (
+                        potential + heading_accuracy + short_passing + volleys + dribbling + curve + free_kick_accuracy + long_passing + ball_control + long_shots + penalties) / 11
+        goalkeeping = (gk_diving + gk_handling + gk_kicking + gk_positioning + gk_reflexes) / 5
+
+        one_guy_attr = [attacking, defensive, physical, mental, technical, goalkeeping]
+
+        attr_list.append(one_guy_attr)
+        complete_attr_list.append([attacking, defensive, physical, mental, technical, goalkeeping, player_id, overall_rating])
+
+    pca = PCA(n_components=2)
+    results = pca.fit_transform(np.array(attr_list))
+
+    for i in range(0, len(results)):
+        complete_attr_list[i].append(results[i][0])
+        complete_attr_list[i].append(results[i][1])
+
+    for player in complete_attr_list:
+        player_id = player[6]
+        name = getPlayerName(player_id)
+        player.append(name)
+
+    final_dict = {}
+    for player in complete_attr_list:
+        attributes_names_list = ['Att', 'Def', 'Phy', 'Men', 'Tech', 'GK', 'id', 'Ovl', 'X', 'Y', 'Name']
+        dict_list = zip(attributes_names_list, player)
+        dict_list = dict(dict_list)
+        player_id = player[6]
+        final_dict[player_id] = dict_list
+
+    return final_dict
+
+# getPlayerAttributes()
 
 # season = "2015/2016"
 # getEndSeasonStatisticsOfTeamForSeason("1729", season, "8668")

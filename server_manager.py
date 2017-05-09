@@ -109,6 +109,14 @@ def getHistoryStandingsForTeam():
     print json_data
     return json_data
 
+@app.route("/data/global/scout")
+def getAllPlayerAttributes():
+    player_attributes = database_manager.getPlayerAttributes()
+    json_data = json.dumps(player_attributes)
+
+    print json_data
+
+    return json_data
 
 @app.route("/")
 def index():
