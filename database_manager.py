@@ -526,14 +526,63 @@ def getEndSeasonStatisticsOfTeamForSeason(league_id, season, team_id):
 
 
 # TODO: Player info
-def getPlayerName(player_id):
-    player_name_query = "Select player_name From Player Where player_api_id = ?;"
+def getPlayerNameHeightWeight(player_id):
+    player_name_query = "Select player_name, height, weight From Player Where player_api_id = ?;"
     cursor.execute(player_name_query, (player_id,))
     name = ""
+    height = 170.0
+    weight = 170
     for row in cursor:
         name = unicodedata.normalize('NFKD', row[0]).encode('ascii', 'ignore')
+        height = row[1]
+        weight = row[2]
 
-    return name
+    return name, height, weight
+
+def getPlayerPosition(player_id):
+    get_player_pos_query = "Select home_player_X1, home_player_X2, home_player_X3, home_player_X4, home_player_X5, home_player_X6, home_player_X7, home_player_X8, home_player_X9, home_player_X10, home_player_X11, home_player_Y1, home_player_Y2, home_player_Y3, home_player_Y4, home_player_Y5, home_player_Y6, home_player_Y7, home_player_Y8, home_player_Y9, home_player_Y10, home_player_Y11, away_player_X1, away_player_X2, away_player_X3, away_player_X4, away_player_X5, away_player_X6, away_player_X7, away_player_X8, away_player_X9, away_player_X10, away_player_X11, away_player_Y1, away_player_Y2, away_player_Y3, away_player_Y4, away_player_Y5, away_player_Y6, away_player_Y7, away_player_Y8, away_player_Y9, away_player_Y10, away_player_Y11, home_player_1, home_player_2, home_player_3, home_player_4, home_player_5, home_player_6, home_player_7, home_player_8, home_player_9, home_player_10, home_player_11, away_player_1, away_player_2, away_player_3, away_player_4, away_player_5, away_player_6, away_player_7, away_player_8, away_player_9, away_player_10, away_player_11 From Match Where season = ?;";
+    cursor.execute(get_player_pos_query, ("2015/2016",))
+    pos = "NA"
+    for row in cursor:
+        gameType = ""
+        pos = 0
+
+        homeBaseColumnName = "home_player_"
+        awayBaseColumnName = "away_player_"
+
+        # home
+        for i in range(44, 55):
+            result_player_id = row[i]
+            if result_player_id == player_id:
+                pos = i % 11
+                gameType = "home"
+
+        # away
+        for i in range(55, 66):
+            result_player_id = row[i]
+            if result_player_id == player_id:
+                pos = i % 11
+                gameType = "away"
+
+        y_pos = 0
+        if gameType == "home":
+            index = pos + 11
+            y_pos = row[index]
+        elif gameType == "away":
+            index = pos + 33
+            y_pos = row[index]
+
+        y_pos = int(y_pos)
+        if y_pos == 0:
+            pos = "GK"
+        elif y_pos > 0 and y_pos <= 6:
+            pos = "DEF"
+        elif y_pos > 6 and y_pos <= 8:
+            pos = "MID"
+        elif y_pos > 8:
+            pos = "ST"
+
+    return pos
 
 def getPlayerAttributes():
     get_player_attributes_query = "Select date, overall_rating, potential, attacking_work_rate, defensive_work_rate, crossing, finishing, heading_accuracy, short_passing, volleys, dribbling, curve, free_kick_accuracy, long_passing, ball_control, acceleration, sprint_speed, agility, reactions, balance, shot_power, jumping, stamina, strength, long_shots, aggression, interceptions, positioning, vision, penalties, marking, standing_tackle, sliding_tackle, gk_diving, gk_handling, gk_kicking, gk_positioning, gk_reflexes, player_api_id From Player_Attributes;";
@@ -706,20 +755,30 @@ def getPlayerAttributes():
 
     for player in complete_attr_list:
         player_id = player[6]
-        name = getPlayerName(player_id)
+        name, height, weight = getPlayerNameHeightWeight(player_id)
         player.append(name)
+        player.append(height)
+        player.append(weight)
+
+    # for player in complete_attr_list:
+    #     player_id = player[6]
+    #     pos = getPlayerPosition(player_id)
+    #     player.append(pos)
 
     final_dict = {}
     for player in complete_attr_list:
-        attributes_names_list = ['Att', 'Def', 'Phy', 'Men', 'Tech', 'GK', 'id', 'Ovl', 'X', 'Y', 'Name']
+        attributes_names_list = ['Att', 'Def', 'Phy', 'Men', 'Tech', 'GK', 'id', 'Ovl', 'X', 'Y', 'Name', 'Ht', 'Wt']
         dict_list = zip(attributes_names_list, player)
         dict_list = dict(dict_list)
         player_id = player[6]
         final_dict[player_id] = dict_list
 
+    print final_dict
+
     return final_dict
 
-# getPlayerAttributes()
+getPlayerAttributes()
+# getPlayerPosition("111")
 
 # season = "2015/2016"
 # getEndSeasonStatisticsOfTeamForSeason("1729", season, "8668")
