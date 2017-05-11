@@ -1,13 +1,15 @@
 queue()
-    .defer(d3.json, "/data/countries/teams?country_id=1729")
-    .await(init);
+    .defer(d3.json, "/data/menu/")
+    .await(initMenu);
 
 function init(error, standings) {
 
-    // for (var key in standings) {
-    //     console.log(key);
-    //     console.log(standings[key]);
-    // }
+    for (var key in standings) {
+        console.log(key);
+        console.log(standings[key]);
+    }
+
+    loadStackedBars();
 
 
 }

@@ -2,22 +2,81 @@
 <html>
 <style>
 
-
 </style>
 
 <head>
 
+    <link rel="stylesheet" type="text/css"
+    	href="{{ url_for('static', filename='stylesheet.css') }}">
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-
     <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
-
+    <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/queue.v1.min.js"></script>
+    <script src="https://d3js.org/d3-color.v1.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 
 </head>
 
+<title>
+    Title
+</title>
+
+<div id="mainBubble" style="height: 250px;"></div>
+<div id="contentArea" style="height: 100%; visibility: hidden;">
+
+<div id="wholeThing"
+			style="height: 100%; width: 100%; overflow: hidden;">
+			<div id="leftThing" style="float: left; height: 700px; width: 49%;">
+                <div id="wholeSelection" style= "overflow: hidden; height: 100px;">
+			         <div id="leftCol" style="float: left; height: 100%; width: 50%;">
+                         <form>
+                           <label><input id= "grouped" type="radio" name="mode" value="grouped" onclick="onModeChanged(this)"> Grouped</label>
+                           <label><input id= "stacked" type="radio" name="mode" value="stacked" checked onclick="onModeChanged(this)"> Stacked</label>
+                         </form>
+
+			         </div>
+
+			         <div id="rightCol" style="float: right; height: 100%; width: 50%;">
+                         <form style="margin-left: 300px">
+                           <label><input id= "overall" type="radio" name="stat" value="overall" checked onclick="onStatChanged(this)"> Overall</label>
+                           <label><input id= "home" type="radio" name="stat" value="home" onclick="onStatChanged(this)"> Home</label>
+                           <label><input id= "away" type="radio" name="stat" value="away" onclick="onStatChanged(this)"> Away</label>
+                         </form>
+			         </div>
+		        </div>
+
+                <svg id="stackedBars" width="900" height="450"></svg>
+
+                <div class="three">
+                    <label id="position"><input id="Pos" type="checkbox" onclick="onParamChanged(this)"/>Position</label>
+                    <label id="points"><input id="Pts" type="checkbox" onclick="onParamChanged(this)"/>Points</label>
+                    <label id="wins"><input id="W" type="checkbox" onclick="onParamChanged(this)"/>Wins</label>
+                    <label id="losses"><input id="L" type="checkbox" onclick="onParamChanged(this)"/>Losses</label>
+                    <label id="draws"><input id="D" type="checkbox" onclick="onParamChanged(this)"/>Draws</label>
+                    <label id="gf"><input id="GF" type="checkbox" onclick="onParamChanged(this)"/>Goals For</label>
+                    <label id="ga"><input id="GA" type="checkbox" onclick="onParamChanged(this)"/>Goals against</label>
+                    <label id="gd"><input id="GD" type="checkbox" onclick="onParamChanged(this)"/>Goal difference</label>
+                    <label id="cs"><input id="CS" type="checkbox" onclick="onParamChanged(this)"/>Clean Sheets</label>
+                </div>
+
+
+
+			</div>
+			<div id="rightThing" style="float: right; height: 700px; width: 49%; ">
+                <svg id="multiLineGraph" width="900" height="550"></svg>
+			</div>
+		</div>
+</div>
+
+
 <body>
 
-<script src="./static/js/main.js"></script>
+    <script src="./static/js/bubbleMenu.js"></script>
+    <script src="./static/js/stackedBars.js"></script>
+    <script src="./static/js/multiLineGraph.js"></script>
+    <script src="./static/js/main.js"></script>
+
 
 </body>
 
