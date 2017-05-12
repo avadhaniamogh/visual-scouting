@@ -983,16 +983,6 @@ def getPlayerAttributesWithFiler(lower, higher):
 
     for player in complete_attr_list:
         player_id = player[6]
-        player_x = player[8]
-        player_y = player[9]
-        if (player_x < minX):
-            minX = player_x
-        if (player_x > maxX):
-            maxX = player_x
-        if (player_y < minY):
-            minY = player_y
-        if (player_y > maxY):
-            maxY = player_y
         name, height, weight = getPlayerNameHeightWeight(player_id)
         player.append(name)
         player.append(height)
@@ -1013,6 +1003,21 @@ def getPlayerAttributesWithFiler(lower, higher):
 
     final_player_list = []
     for key, value in final_player_dict.iteritems():
+        # print value
+        player_x = value['X']
+        player_y = value['Y']
+        # print "X:"
+        # print value['X']
+        # print "Y:"
+        # print value['Y']
+        if (player_x < minX):
+            minX = player_x
+        if (player_x > maxX):
+            maxX = player_x
+        if (player_y < minY):
+            minY = player_y
+        if (player_y > maxY):
+            maxY = player_y
         final_player_list.append(value)
 
     final_dict = {}
@@ -1022,7 +1027,7 @@ def getPlayerAttributesWithFiler(lower, higher):
     final_dict['maxY'] = maxY
     final_dict['player_list'] = final_player_list
 
-    print final_player_list
+    print final_dict
 
     return final_dict
 
