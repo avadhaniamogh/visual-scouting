@@ -781,13 +781,17 @@ def getPlayerAttributes():
     #     pos = getPlayerPosition(player_id)
     #     player.append(pos)
 
-    final_player_list = []
+        final_player_dict = []
     for player in complete_attr_list:
         attributes_names_list = ['Att', 'Def', 'Phy', 'Men', 'Tech', 'GK', 'id', 'Ovl', 'X', 'Y', 'Name', 'Ht', 'Wt']
         dict_list = zip(attributes_names_list, player)
         dict_list = dict(dict_list)
         player_id = player[6]
-        final_player_list.append(dict_list)
+        final_player_dict[player_id] = dict_list
+
+    final_player_list = []
+    for key, value in final_player_dict.iteritems():
+        final_player_list.append(value)
 
     print final_player_list
 
@@ -999,13 +1003,17 @@ def getPlayerAttributesWithFiler(lower, higher):
     #     pos = getPlayerPosition(player_id)
     #     player.append(pos)
 
-    final_player_list = []
+    final_player_dict = {}
     for player in complete_attr_list:
         attributes_names_list = ['Att', 'Def', 'Phy', 'Men', 'Tech', 'GK', 'id', 'Ovl', 'X', 'Y', 'Name', 'Ht', 'Wt']
         dict_list = zip(attributes_names_list, player)
         dict_list = dict(dict_list)
         player_id = player[6]
-        final_player_list.append(dict_list)
+        final_player_dict[player_id] = dict_list
+
+    final_player_list = []
+    for key, value in final_player_dict.iteritems():
+        final_player_list.append(value)
 
     final_dict = {}
     final_dict['minX'] = minX
@@ -1014,7 +1022,7 @@ def getPlayerAttributesWithFiler(lower, higher):
     final_dict['maxY'] = maxY
     final_dict['player_list'] = final_player_list
 
-    # print final_player_list
+    print final_player_list
 
     return final_dict
 
