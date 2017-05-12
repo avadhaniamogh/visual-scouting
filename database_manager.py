@@ -5,6 +5,7 @@ import unicodedata
 from sklearn.decomposition import PCA
 import pandas as pd
 import numpy as np
+import sys
 
 conn = sqlite3.connect('database.sqlite')
 cursor = conn.cursor()
@@ -525,7 +526,7 @@ def getEndSeasonStatisticsOfTeamForSeason(league_id, season, team_id):
     return dict_list
 
 
-# TODO: Player info
+# Player info
 def getPlayerNameHeightWeight(player_id):
     player_name_query = "Select player_name, height, weight From Player Where player_api_id = ?;"
     cursor.execute(player_name_query, (player_id,))
@@ -753,8 +754,23 @@ def getPlayerAttributes():
         complete_attr_list[i].append(results[i][0])
         complete_attr_list[i].append(results[i][1])
 
+    minX = sys.maxint
+    maxX = 0
+    minY = sys.maxint
+    maxY = 0
+
     for player in complete_attr_list:
         player_id = player[6]
+        player_x = player[8]
+        player_y = player[9]
+        if(player_x < minX):
+            minX = player_x
+        if(player_x > maxX):
+            maxX = player_x
+        if(player_y < minY):
+            minY = player_y
+        if(player_y > maxY):
+            maxY = player_y
         name, height, weight = getPlayerNameHeightWeight(player_id)
         player.append(name)
         player.append(height)
@@ -765,19 +781,28 @@ def getPlayerAttributes():
     #     pos = getPlayerPosition(player_id)
     #     player.append(pos)
 
-    final_dict = {}
+    final_player_dict = {}
     for player in complete_attr_list:
         attributes_names_list = ['Att', 'Def', 'Phy', 'Men', 'Tech', 'GK', 'id', 'Ovl', 'X', 'Y', 'Name', 'Ht', 'Wt']
         dict_list = zip(attributes_names_list, player)
         dict_list = dict(dict_list)
         player_id = player[6]
-        final_dict[player_id] = dict_list
+        final_player_dict[player_id] = dict_list
 
-    print final_dict
+    final_dict = {}
+    final_dict['minX'] = minX
+    final_dict['minY'] = minY
+    final_dict['maxY'] = maxX
+    final_dict['maxY'] = maxY
+    final_dict['player_list'] = final_player_dict
+
+    # print final_dict
 
     return final_dict
 
-getPlayerAttributes()
+
+
+# getPlayerAttributes()
 # getPlayerPosition("111")
 
 # season = "2015/2016"
