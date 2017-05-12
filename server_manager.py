@@ -118,6 +118,17 @@ def getAllPlayerAttributes():
 
     return json_data
 
+@app.route("/data/global/scout/filter")
+def getAllPlayerAttributesWithFilter():
+    min_ovl = request.args.get('min_ovl')
+    max_ovl = request.args.get('max_ovl')
+    player_attributes = database_manager.getPlayerAttributesWithFiler(min_ovl, max_ovl)
+    json_data = json.dumps(player_attributes)
+
+    print json_data
+
+    return json_data
+
 @app.route("/")
 def index():
     return render_template("index.html")
